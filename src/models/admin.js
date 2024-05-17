@@ -36,6 +36,17 @@ const adminSchema = mongoose.Schema({
     }
 })
 
+const Admin = mongoose.model("Admin", adminSchema);
+
+adminSchema.pre("save",async function (next){
+    const admin = this;
+    if(admin.isModified("password")){
+        admin.password = await bcrypt.hash(admin.password, 8);
+    }
+
+    next();
+});
+
 adminSchema.statics.uploadImage = (imageFile) =>{
     const allowedExt = ["jpg", "jpeg", "png", "JPEG"];
     let result = "";
@@ -94,15 +105,5 @@ adminSchema.statics.authentication = async (email, password) =>{
     return admin;
 }
 
-adminSchema.pre("save",async function (next){
-    const admin = this;
-    if(admin.isModified("password")){
-        admin.password = await bcrypt.hash(admin.password, 8);
-    }
-
-    next();
-});
-
-const Admin = mongoose.model("Admin", adminSchema);
 
 module.exports = Admin;
