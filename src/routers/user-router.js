@@ -7,6 +7,15 @@ const idGenerator = require("../utilis/idGenerator.js");
 
 const router = new express.Router();
 
+router.post("/user", async (req, res) =>{
+    const user = await User.authentication(req.body.email, req.body.password);
+    if(user.error){
+        return res.send({error: user.error})
+    }
+    req.session.user = await User.sendPublicData(user);
+    res.send(User.sendPublicData(user));
+});
+
 //-------------------api endpoints---------------------------------------
 router.post("/api/user", apiAuth, async (req, res) =>{
     try{
@@ -18,6 +27,7 @@ router.post("/api/user", apiAuth, async (req, res) =>{
         await user.save();
         res.send(User.sendPublicData(user));
     }catch(error){
+        console.log(error);
         if(error.message.includes("Invalid email")){
             return res.send({error: "Invalid email address!"});
         }

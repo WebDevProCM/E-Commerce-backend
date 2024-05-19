@@ -10,7 +10,7 @@ const router = new express.Router();
 router.post("/api/cart", apiAuth, async (req, res) =>{
     try{
         req.body.user = req.session.user._id;
-        const product = await Product.findOne({prodId: req.body.prodId});
+        const product = await Product.findById(req.body.product);
         if(!product){
             return res.send({error: "Product not found!"});
         }
@@ -22,17 +22,34 @@ router.post("/api/cart", apiAuth, async (req, res) =>{
         }
         req.body.total = req.body.quantity * product.price;
 
+        const checkExistCart = await Cart.findOne({user: req.session.user._id, product: req.body.product}).populate("product", 
+        {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1 });
+        
+        if(checkExistCart){
+            if((req.body.quantity + checkExistCart.quantity) > product.quantity){
+                return res.send({error: "Not having enough quantities"});
+            }
+            req.body.total = req.body.quantity * product.price;
+            checkExistCart.quantity = req.body.quantity;
+            checkExistCart.total = req.body.total;
+            await checkExistCart.save();
+            return res.send(checkExistCart);   
+        }
+
         const cart = new Cart(req.body);
         await cart.save();
+        await cart.populate("product", {name: 1, prodId: 1, image: 1, price: 1,  category: 1, type: 1});
         res.send(cart);
     }catch(error){
+        console.log(error);
         res.send({error: "Something went wrong!"});
     }
 });
 
 router.get("/api/cart", apiAuth, async (req, res) =>{
     try{
-        const carts = await Cart.find({user: req.session.user._id});
+        const carts = await Cart.find({user: req.session.user._id}).populate("product", 
+            {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1});
         res.send(carts);
     }catch(error){
         res.send({error: "Something went wrong!"});
@@ -41,7 +58,8 @@ router.get("/api/cart", apiAuth, async (req, res) =>{
 
 router.get("/api/cart/:id", apiAuth, async (req, res) =>{
     try{
-        const cart = await Cart.findOne({user: req.session.user._id, _id: req.params.id});
+        const cart = await Cart.findOne({user: req.session.user._id, _id: req.params.id}).populate("product", 
+            {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1});
         if(!cart){
             return res.send({error: "Cart item not found!"});
         }
@@ -53,7 +71,7 @@ router.get("/api/cart/:id", apiAuth, async (req, res) =>{
 
 router.patch("/api/cart/:id", apiAuth, async (req, res) =>{
     try{
-        const allowedFields = ["quantities"];
+        const allowedFields = ["quantity"];
         const updatingFields = Object.keys(req.body);
         const checkValidity = updatingFields.every((field) =>{
             return allowedFields.includes(field);
@@ -61,11 +79,12 @@ router.patch("/api/cart/:id", apiAuth, async (req, res) =>{
         if(!checkValidity){
             return res.send({error: "Invalid field update"});
         }
-        const cart = await Cart.findOne({user: req.session.user._id, _id: req.params.id}).populate("product");
+        const cart = await Cart.findOne({user: req.session.user._id, _id: req.params.id}).populate("product", 
+            {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1 });
         if(!cart){
             return res.send({error: "Cart item not found!"});
         }
-        const product = await Product.findOne({prodId: cart.product._id});
+        const product = await Product.findById(cart.product._id);
         if(!product){
             return res.send({error: "Product is not found!"});
         }
@@ -84,7 +103,8 @@ router.patch("/api/cart/:id", apiAuth, async (req, res) =>{
 
 router.delete("/api/cart/:id", apiAuth, async (req, res) =>{
     try{
-        const cart = await Cart.findOneAndDelete({user: req.session.user._id, _id: req.params.id});
+        const cart = await Cart.findOneAndDelete({user: req.session.user._id, _id: req.params.id}).populate("product", 
+            {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1 });
         if(!cart){
             return res.send({error: "Cart item not found!"});
         }

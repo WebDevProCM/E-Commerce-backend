@@ -51,9 +51,12 @@ const productsSchema = mongoose.Schema({
         type: String,
         trim: true,
         required: true
+    },
+    ml:{
+        type: Number,
+        required: true
     }
 });
-
 const Product = mongoose.model("Products", productsSchema);
 
 productsSchema.statics.uploadImage = (imageFile) =>{
@@ -89,6 +92,5 @@ productsSchema.statics.prevImageRemove = async (imageName) =>{
     });
     return {success: "old image removed!"};
 }
-
 
 module.exports = Product;

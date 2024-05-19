@@ -11,7 +11,7 @@ router.post("/", async (req, res) =>{
     if(admin.error){
         return res.send({error: admin.error})
     }
-    req.session.user = await Admin.sendPublicData(admin);
+    req.session.admin = await Admin.sendPublicData(admin);
     res.send(Admin.sendPublicData(admin));
 });
 
@@ -24,9 +24,9 @@ router.post("/api/admin", apiAuth, async (req, res) =>{
         }
 
         await admin.save();
-        admin = await Admin.sendPublicData(admin);
-        res.send(admin);
-    }catch(error){;
+        res.send(Admin.sendPublicData(admin));
+    }catch(error){
+        console.log(error);
         res.send({error:"something went wrong!"});
     }
 });
@@ -73,7 +73,7 @@ router.patch("/api/admin/:id", apiAuth, async (req, res) =>{
         if(!validationCheck){
             return res.send({error: "Invalid field update!"});
         }
-        const admin = await Admin.findOne({_id: req.params.id});
+        const admin = await Admin.findById(req.params.id);
         if(!admin){
             return res.send({error: "admin not updated!"});
         }

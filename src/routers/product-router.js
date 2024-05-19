@@ -55,7 +55,7 @@ router.get("/api/product/:id", apiAuth, async (req, res) =>{
 
 router.patch("/api/product/:id", apiAuth, async (req, res) =>{
     try{
-        const allowedFields = ["name", "quantity", "price", "oldPrice", "status", "image", "category", "type", "description"];
+        const allowedFields = ["name", "quantity", "price", "oldPrice", "status", "image", "category", "type", "description", "ml"];
         if(req.files){
             const imageName = await Product.uploadImage(req.files.image);
             if(imageName.error){

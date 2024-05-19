@@ -1,5 +1,7 @@
+const fs = require("fs");
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcrypt");
 
 const userSchema = mongoose.Schema({
     name: {
@@ -37,8 +39,6 @@ const userSchema = mongoose.Schema({
         default: "noUserImage.png"
     }
 });
-
-const User =  mongoose.model("Users", userSchema);
 
 userSchema.statics.uploadImage = (imageFile) =>{
     const allowedExt = ["jpg", "jpeg", "png", "JPEG"];
@@ -106,6 +106,8 @@ userSchema.pre("save",async function (next){
 
     next();
 });
+
+const User =  mongoose.model("Users", userSchema);
 
 module.exports = User;
 
