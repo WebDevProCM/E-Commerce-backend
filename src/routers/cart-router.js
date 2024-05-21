@@ -47,11 +47,13 @@ router.post("/api/cart", apiAuth, async (req, res) =>{
 });
 
 router.get("/api/cart", apiAuth, async (req, res) =>{
+    console.log(req.sessionID);
     try{
         const carts = await Cart.find({user: req.session.user._id}).populate("product", 
             {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1});
         res.send(carts);
     }catch(error){
+        console.log(error);
         res.send({error: "Something went wrong!"});
     }
 });
@@ -65,6 +67,7 @@ router.get("/api/cart/:id", apiAuth, async (req, res) =>{
         }
         res.send(cart);
     }catch(error){
+        console.log(error);
         res.send({error: "Something went wrong!"});
     }
 });

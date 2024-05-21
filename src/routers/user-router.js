@@ -7,15 +7,26 @@ const idGenerator = require("../utilis/idGenerator.js");
 
 const router = new express.Router();
 
-router.post("/user", async (req, res) =>{
-    const user = await User.authentication(req.body.email, req.body.password);
-    if(user.error){
-        return res.send({error: user.error})
+router.post("/user/login", async (req, res) =>{
+    try{
+        const user = await User.authentication(req.body.email, req.body.password);
+        if(user.error){
+            return res.send({error: user.error})
+        }
+        req.session.user = await User.sendPublicData(user);
+        res.send(User.sendPublicData(user));
+    }catch(error){
+        res.send({error:"Something went wrong!"});
     }
-    req.session.user = await User.sendPublicData(user);
-    res.send(User.sendPublicData(user));
 });
-
+router.post("/user/logout", auth, async (req, res) =>{
+    try{
+        req.session.user = undefined;
+        res.send({success: "Looged Out"});
+    }catch(error){
+        res.send({error: "Something went wrong!"});
+    }
+});
 //-------------------api endpoints---------------------------------------
 router.post("/api/user", apiAuth, async (req, res) =>{
     try{
@@ -36,6 +47,7 @@ router.post("/api/user", apiAuth, async (req, res) =>{
 });
 
 router.get("/api/user", apiAuth, async (req, res) =>{
+    console.log(req.sessionID);
     try{
         const users = await User.find({});
         res.send(users);

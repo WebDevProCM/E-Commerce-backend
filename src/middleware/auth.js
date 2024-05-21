@@ -1,7 +1,8 @@
 const auth = async (req, res, next) =>{
-    // if(!req.session.user || !req.session.admin){
-    //     return res.redirect("/")
-    // }
+    console.log(req.sessionID);
+    if(!req.session.user){
+        return res.send({error: "Not a authorized user"})
+    }
     next();
 }
 
