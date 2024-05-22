@@ -2,6 +2,7 @@ const express = require("express");
 const Review = require("../models/reviews.js");
 const Product = require("../models/product.js");
 const apiAuth = require("../middleware/apiAuth.js");
+const publicAuth = require("../middleware/publicAuth.js");
 const auth = require("../middleware/auth.js");
 
 const router = new express.Router();
@@ -25,9 +26,9 @@ router.post("/api/review", apiAuth, async (req, res) =>{
     }
 });
 
-router.get("/api/review", apiAuth, async (req, res) =>{
+router.get("/api/review", publicAuth, async (req, res) =>{
     try{
-        const reviews = await Review.find({user: req.session.user._id}).populate("product", 
+        const reviews = await Review.find().populate("product", 
             {name: 1, prodId: 1, _id: 1, category: 1}).populate("user", 
             {name: 1, email: 1, address: 1});
         res.send(reviews);
@@ -36,9 +37,9 @@ router.get("/api/review", apiAuth, async (req, res) =>{
     }
 });
 
-router.get("/api/review/:id", apiAuth, async (req, res) =>{
+router.get("/api/review/:id", publicAuth, async (req, res) =>{
     try{
-        const review = await Review.findOne({user: req.session.user._id, _id: req.params.id});
+        const review = await Review.findById(req.params.id);
         await review.populate("product", {name: 1, prodId: 1, _id: 1, category: 1});
         await review.populate("user", {name: 1, email: 1, address: 1});
 

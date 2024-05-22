@@ -1,11 +1,20 @@
 const express = require("express");
 const User = require("../models/user.js");
-
 const auth = require("../middleware/auth.js");
 const apiAuth = require("../middleware/apiAuth.js");
-const idGenerator = require("../utilis/idGenerator.js");
 
 const router = new express.Router();
+
+router.get("/user/logged", async (req, res) =>{
+    try{
+        if(req.session.user){
+            return res.send(req.session.user);
+        }
+        res.send({error: "No user logged!"});
+    }catch(error){
+        res.send({error: "Something went wrong!"});
+    }
+});
 
 router.post("/user/login", async (req, res) =>{
     try{

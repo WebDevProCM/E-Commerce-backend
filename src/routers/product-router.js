@@ -3,6 +3,7 @@ const Product = require("../models/product.js");
 
 const auth = require("../middleware/auth.js");
 const apiAuth = require("../middleware/apiAuth.js");
+const publicAuth = require("../middleware/publicAuth.js");
 const idGenerator = require("../utilis/idGenerator.js");
 
 const router = new express.Router();
@@ -32,7 +33,7 @@ router.post("/api/product", apiAuth, async (req, res) =>{
     }
 });
 
-router.get("/api/product", apiAuth, async (req, res) =>{
+router.get("/api/product", publicAuth, async (req, res) =>{
     try{
         const products = await Product.find({});
         res.send(products);
@@ -41,14 +42,18 @@ router.get("/api/product", apiAuth, async (req, res) =>{
     }
 });
 
-router.get("/api/product/:id", apiAuth, async (req, res) =>{
+router.get("/api/product/:id", publicAuth, async (req, res) =>{
     try{
         const product = await Product.findOne({prodId: req.params.id});
         if(!product){
             return res.send({error: "product not found!"});
         }
+        if(req.session.public){
+            req.session.public.products.push(product);
+        }
         res.send(product);
     }catch(error){
+        console.log(error);
         res.send({error: "something went wrong!"});
     }
 });

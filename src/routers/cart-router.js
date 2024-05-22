@@ -47,7 +47,6 @@ router.post("/api/cart", apiAuth, async (req, res) =>{
 });
 
 router.get("/api/cart", apiAuth, async (req, res) =>{
-    console.log(req.sessionID);
     try{
         const carts = await Cart.find({user: req.session.user._id}).populate("product", 
             {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1});
