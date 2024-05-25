@@ -1,7 +1,6 @@
 const express = require("express");
 const Product = require("../models/product.js");
 
-const auth = require("../middleware/auth.js");
 const apiAuth = require("../middleware/apiAuth.js");
 const publicAuth = require("../middleware/publicAuth.js");
 const idGenerator = require("../utilis/idGenerator.js");

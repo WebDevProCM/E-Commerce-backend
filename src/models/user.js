@@ -1,7 +1,9 @@
 const fs = require("fs");
+const path = require("path");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
+const ObjectId = mongoose.Types.ObjectId;
 
 const userSchema = mongoose.Schema({
     name: {
@@ -78,7 +80,8 @@ userSchema.statics.sendPublicData = (user) =>{
         _id: user._id,
         name: user.name,
         image: user.image,
-        email: user.email
+        email: user.email,
+        address: user.address
     }
 }
 

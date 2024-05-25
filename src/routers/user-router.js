@@ -81,6 +81,14 @@ router.get("/api/user/:id", apiAuth, async (req, res) =>{
 router.patch("/api/user/:id", apiAuth, async (req, res) =>{
     try{
         const allowedFields = ["name", "address", "password", "image"];
+        if(req.files){
+            const imageName = await User.uploadImage(req.files.image);
+            if(imageName.error){
+                return res.send({error: imageName.error});
+            }
+
+            req.body.image = imageName;
+        }
         const updatingFields = Object.keys(req.body);
         const validationCheck = updatingFields.every((field) =>{
             return allowedFields.includes(field);
@@ -89,14 +97,25 @@ router.patch("/api/user/:id", apiAuth, async (req, res) =>{
         if(!validationCheck){
             return res.send({error: "Invalid field update!"});
         }
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true});
+        const user = await User.findById(req.params.id);
         if(!user){
             res.send({error: "User not updated!"});
         }
+        const oldImageName = user.image;
+
+        updatingFields.forEach((field)=>{
+            user[field] = req.body[field];
+        });
+
+        if(oldImageName !== user.image){
+            const result =  await User.prevImageRemove(oldImageName);
+        }
 
         await user.save();
+        req.session.user = await User.sendPublicData(user);
         res.send(User.sendPublicData(user));
     }catch(error){
+        console.log(error);
         res.send({error: "something went wrong!"});
     }
 });
