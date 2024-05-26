@@ -47,7 +47,6 @@ router.post("/api/user", apiAuth, async (req, res) =>{
         await user.save();
         res.send(User.sendPublicData(user));
     }catch(error){
-        console.log(error);
         if(error.message.includes("Invalid email")){
             return res.send({error: "Invalid email address!"});
         }
@@ -56,7 +55,6 @@ router.post("/api/user", apiAuth, async (req, res) =>{
 });
 
 router.get("/api/user", apiAuth, async (req, res) =>{
-    console.log(req.sessionID);
     try{
         const users = await User.find({});
         res.send(users);
@@ -115,7 +113,6 @@ router.patch("/api/user/:id", apiAuth, async (req, res) =>{
         req.session.user = await User.sendPublicData(user);
         res.send(User.sendPublicData(user));
     }catch(error){
-        console.log(error);
         res.send({error: "something went wrong!"});
     }
 });

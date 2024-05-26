@@ -21,7 +21,6 @@ router.post("/api/review", apiAuth, async (req, res) =>{
         await review.populate("user", {name: 1, email: 1, address: 1});
         res.send(review);
     }catch(error){
-        console.log(error);
         res.send({error: "Something went wrong!"});
     }
 });
@@ -72,7 +71,6 @@ router.patch("/api/review/:id", apiAuth, async (req, res) =>{
         await review.save();
         res.send(review);
     }catch(error){
-        console.log(error);
         res.send({error: "Something went wrong!"});
     }
 });

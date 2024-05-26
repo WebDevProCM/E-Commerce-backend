@@ -19,7 +19,7 @@ router.post("/api/product", apiAuth, async (req, res) =>{
 
             req.body.image = imageName;
         }
-
+        req.body.price = parseFloat(req.body.price).toFixed(2);
         const product = new Product(req.body);
         if(!product){
             return res.send({error: "product not created!"});
@@ -52,7 +52,6 @@ router.get("/api/product/:id", publicAuth, async (req, res) =>{
         }
         res.send(product);
     }catch(error){
-        console.log(error);
         res.send({error: "something went wrong!"});
     }
 });
@@ -76,6 +75,9 @@ router.patch("/api/product/:id", apiAuth, async (req, res) =>{
 
         if(!validationCheck){
             return res.send({error: "Invalid field update!"});
+        }
+        if(req.body.price){
+            req.body.price = parseFloat(req.body.price).toFixed(2);
         }
 
         const product = await Product.findOne({prodId: req.params.id});

@@ -26,7 +26,6 @@ router.post("/api/admin", apiAuth, async (req, res) =>{
         await admin.save();
         res.send(Admin.sendPublicData(admin));
     }catch(error){
-        console.log(error);
         res.send({error:"something went wrong!"});
     }
 });

@@ -20,7 +20,9 @@ router.post("/api/cart", apiAuth, async (req, res) =>{
         if(req.body.quantity > product.quantity){
             return res.send({error: "Not having enough quantities"});
         }
+        
         req.body.total = req.body.quantity * product.price;
+        req.body.total = parseFloat(req.body.total).toFixed(2);
 
         const checkExistCart = await Cart.findOne({user: req.session.user._id, product: req.body.product}).populate("product", 
         {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1 });
@@ -30,6 +32,7 @@ router.post("/api/cart", apiAuth, async (req, res) =>{
                 return res.send({error: "Not having enough quantities"});
             }
             req.body.total = req.body.quantity * product.price;
+            req.body.total =  parseFloat(req.body.total).toFixed(2);
             checkExistCart.quantity = req.body.quantity;
             checkExistCart.total = req.body.total;
             await checkExistCart.save();
@@ -41,7 +44,6 @@ router.post("/api/cart", apiAuth, async (req, res) =>{
         await cart.populate("product", {name: 1, prodId: 1, image: 1, price: 1,  category: 1, type: 1});
         res.send(cart);
     }catch(error){
-        console.log(error);
         res.send({error: "Something went wrong!"});
     }
 });
@@ -52,7 +54,6 @@ router.get("/api/cart", apiAuth, async (req, res) =>{
             {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1});
         res.send(carts);
     }catch(error){
-        console.log(error);
         res.send({error: "Something went wrong!"});
     }
 });
@@ -66,7 +67,6 @@ router.get("/api/cart/:id", apiAuth, async (req, res) =>{
         }
         res.send(cart);
     }catch(error){
-        console.log(error);
         res.send({error: "Something went wrong!"});
     }
 });
@@ -95,6 +95,7 @@ router.patch("/api/cart/:id", apiAuth, async (req, res) =>{
         }
         cart.quantity = req.body.quantity;
         cart.total = req.body.quantity * product.price;
+        cart.total =  parseFloat(cart.total).toFixed(2);
 
         await cart.save();
         res.send(cart);
