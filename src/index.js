@@ -23,7 +23,16 @@ app.use(cors({
 const staticFilesDir = path.join(__dirname, "../public");
 app.use(express.static(staticFilesDir));
 
-app.use(session({secret: process.env.SECRET, saveUninitialized: true, resave: true}));
+app.use(session({
+  secret: process.env.SECRET,
+  saveUninitialized: true, resave: true, 
+  cookie: {
+    secure: true,
+    httpOnly: false,
+    sameSite: 'none'
+  }
+}));
+
 app.use(expressFile());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));

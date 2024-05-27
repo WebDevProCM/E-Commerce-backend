@@ -113,6 +113,7 @@ router.patch("/api/user/:id", apiAuth, async (req, res) =>{
         req.session.user = await User.sendPublicData(user);
         res.send(User.sendPublicData(user));
     }catch(error){
+        console.log(error);
         res.send({error: "something went wrong!"});
     }
 });
