@@ -16,7 +16,7 @@ const cartRouter = require("./routers/cart-router.js");
 const reviewRouter = require("./routers/review-router.js");
 
 app.use(cors({
-    origin: 'http://localhost:3001',
+    origin: process.env.URL,
     methods: ['POST', 'PATCH', 'GET', 'DELETE', 'OPTIONS', 'HEAD'],
     credentials: true
   }));

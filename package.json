@@ -6,7 +6,7 @@
   "scripts": {
     "install-server": "npm install",
     "start": "node src/index.js",
-    "dev": "env-cmd -f ./config/dev.env nodemon src/index.js -e js"
+    "dev": "env-cmd -f ./confi/dev.env nodemon src/index.js -e js"
   },
   "keywords": [],
   "author": "",
