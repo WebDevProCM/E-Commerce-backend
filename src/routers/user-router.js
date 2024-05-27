@@ -37,7 +37,7 @@ router.post("/user/logout", auth, async (req, res) =>{
     }
 });
 //-------------------api endpoints---------------------------------------
-router.post("/api/user", apiAuth, async (req, res) =>{
+router.post("/api/user", async (req, res) =>{
     try{
         const user = new User(req.body);
         if(!user){
