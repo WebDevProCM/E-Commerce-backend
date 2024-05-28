@@ -18,7 +18,8 @@ const reviewRouter = require("./routers/review-router.js");
 app.use(cors({
     origin: process.env.URL,
     methods: ['POST', 'PATCH', 'GET', 'DELETE', 'OPTIONS', 'HEAD'],
-    credentials: true
+    credentials: true,
+    exposedHeaders: ["set-cookie"]
   }));
 const staticFilesDir = path.join(__dirname, "../public");
 app.use(express.static(staticFilesDir));
@@ -26,10 +27,12 @@ app.use(express.static(staticFilesDir));
 app.use(session({
   secret: process.env.SECRET,
   saveUninitialized: true, resave: true, 
+  proxy:true,
   cookie: {
     secure: true,
     httpOnly: true,
-    sameSite: 'none'
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60
   }
 }));
 
