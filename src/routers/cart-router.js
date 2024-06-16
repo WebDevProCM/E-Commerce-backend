@@ -17,31 +17,30 @@ router.post("/api/cart", apiAuth, async (req, res) =>{
         if(product.status === 0){
             return res.send({error: "Product is not available!"});
         }
-        if(req.body.quantity > product.quantity){
+        if(parseFloat(req.body.quantity) > product.quantity){
             return res.send({error: "Not having enough quantities"});
         }
         
-        req.body.total = req.body.quantity * product.price;
+        req.body.total = parseFloat(req.body.quantity) * product.price;
         req.body.total = parseFloat(req.body.total).toFixed(2);
 
-        const checkExistCart = await Cart.findOne({user: req.session.user._id, product: req.body.product}).populate("product", 
-        {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1 });
+        const checkExistCart = await Cart.findOne({user: req.session.user._id, product: req.body.product}).populate("product");
         
         if(checkExistCart){
-            if((req.body.quantity + checkExistCart.quantity) > product.quantity){
+            if((parseFloat(req.body.quantity) + checkExistCart.quantity) > product.quantity){
                 return res.send({error: "Not having enough quantities"});
             }
-            req.body.total = req.body.quantity * product.price;
+            req.body.total = parseFloat(req.body.quantity) * product.price;
             req.body.total =  parseFloat(req.body.total).toFixed(2);
-            checkExistCart.quantity = req.body.quantity;
-            checkExistCart.total = req.body.total;
+            checkExistCart.quantity = parseFloat(req.body.quantity);
+            checkExistCart.total = parseFloat(req.body.total);
             await checkExistCart.save();
             return res.send(checkExistCart);   
         }
 
         const cart = new Cart(req.body);
         await cart.save();
-        await cart.populate("product", {name: 1, prodId: 1, image: 1, price: 1,  category: 1, type: 1});
+        await cart.populate("product");
         res.send(cart);
     }catch(error){
         res.send({error: "Something went wrong!"});
@@ -81,8 +80,7 @@ router.patch("/api/cart/:id", apiAuth, async (req, res) =>{
         if(!checkValidity){
             return res.send({error: "Invalid field update"});
         }
-        const cart = await Cart.findOne({user: req.session.user._id, _id: req.params.id}).populate("product", 
-            {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1 });
+        const cart = await Cart.findOne({user: req.session.user._id, _id: req.params.id}).populate("product");
         if(!cart){
             return res.send({error: "Cart item not found!"});
         }
@@ -90,11 +88,11 @@ router.patch("/api/cart/:id", apiAuth, async (req, res) =>{
         if(!product){
             return res.send({error: "Product is not found!"});
         }
-        if(req.body.quantity > product.quantity){
+        if(parseFloat(req.body.quantity) > product.quantity){
             return res.send({error: "Not having enough quantities!"});
         }
-        cart.quantity = req.body.quantity;
-        cart.total = req.body.quantity * product.price;
+        cart.quantity = parseFloat(req.body.quantity);
+        cart.total = parseFloat(req.body.quantity) * product.price;
         cart.total =  parseFloat(cart.total).toFixed(2);
 
         await cart.save();
@@ -106,8 +104,7 @@ router.patch("/api/cart/:id", apiAuth, async (req, res) =>{
 
 router.delete("/api/cart/:id", apiAuth, async (req, res) =>{
     try{
-        const cart = await Cart.findOneAndDelete({user: req.session.user._id, _id: req.params.id}).populate("product", 
-            {name: 1, prodId: 1, image: 1, price: 1, category: 1, type: 1 });
+        const cart = await Cart.findOneAndDelete({user: req.session.user._id, _id: req.params.id}).populate("product");
         if(!cart){
             return res.send({error: "Cart item not found!"});
         }

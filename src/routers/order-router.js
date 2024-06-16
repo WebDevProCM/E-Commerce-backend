@@ -61,7 +61,7 @@ router.post("/api/order/details", apiAuth, async (req, res) =>{
             return res.send({error: "Product not available at the moment!"});
         }
 
-        if(product.quantity < req.body.quantity){
+        if(product.quantity < parseFloat(req.body.quantity)){
             return res.send({error: "Not having enough quantities!"});
         }
 
@@ -71,7 +71,7 @@ router.post("/api/order/details", apiAuth, async (req, res) =>{
             checkExstingProduct.total = checkExstingProduct.quantity * checkExstingProduct.price;
         }else{
             order.products.push({
-                quantity: req.body.quantity,
+                quantity: parseFloat(req.body.quantity),
                 prodId: product.prodId,
                 image: product.image,
                 name: product.name,
@@ -86,7 +86,7 @@ router.post("/api/order/details", apiAuth, async (req, res) =>{
         });
         order.totalAmount = totalAmount; 
 
-        product.quantity = product.quantity - req.body.quantity;
+        product.quantity = product.quantity - parseFloat(req.body.quantity);
 
         await order.save();
         await product.save();
@@ -205,17 +205,17 @@ router.patch("/api/order/details/:ordId/:prodId", apiAuth, async (req, res) =>{
             return res.send({error: "OrderDetail not found!"});
         }
 
-        if(req.body.quantity === orderDetail.quantity){
+        if(parseFloat(req.body.quantity) === orderDetail.quantity){
             return res.send(orderDetail);
         }
 
-        if(req.body.quantity > orderDetail.quantity){
-            if(req.body.quantity > product.quantity){
+        if(parseFloat(req.body.quantity) > orderDetail.quantity){
+            if(parseFloat(req.body.quantity) > product.quantity){
                 return res.send({error: "Not having enough quantities!"});
             }
 
-            product.quantity = product.quantity - (req.body.quantity - orderDetail.quantity);
-            orderDetail.quantity = req.body.quantity;
+            product.quantity = product.quantity - (parseFloat(req.body.quantity) - orderDetail.quantity);
+            orderDetail.quantity = parseFloat(req.body.quantity);
             orderDetail.total = orderDetail.price * orderDetail.quantity;
             let totalAmount = 0;
             order.products.forEach((product) =>{
@@ -223,8 +223,8 @@ router.patch("/api/order/details/:ordId/:prodId", apiAuth, async (req, res) =>{
             });
             order.totalAmount = totalAmount; 
         }else{
-            product.quantity = product.quantity + (orderDetail.quantity - req.body.quantity);
-            orderDetail.quantity = req.body.quantity;
+            product.quantity = product.quantity + (orderDetail.quantity - parseFloat(req.body.quantity));
+            orderDetail.quantity = parseFloat(req.body.quantity);
             orderDetail.total = orderDetail.price * orderDetail.quantity;
             let totalAmount = 0;
             order.products.forEach((product) =>{
