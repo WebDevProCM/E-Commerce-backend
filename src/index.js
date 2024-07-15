@@ -27,7 +27,13 @@ app.use(express.static(staticFilesDir));
 app.use(session({
   secret: process.env.SECRET,
   saveUninitialized: true, resave: true, 
-  proxy:true
+  proxy:true,
+  cookie: {
+    secure: true,
+    httpOnly: true,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60
+  }
 }));
 
 app.use(expressFile());
