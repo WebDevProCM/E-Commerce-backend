@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/user.js");
 const auth = require("../middleware/auth.js");
 const apiAuth = require("../middleware/apiAuth.js");
+const imageUpload = require("../utilis/cloudinaryUploadImage.js");
 
 const router = new express.Router();
 
@@ -10,7 +11,7 @@ router.get("/user/logged", async (req, res) =>{
         if(req.session.user){
             return res.send(req.session.user);
         }
-        res.send({error: "No user logged!"});
+        res.send();
     }catch(error){
         res.send({error: "Something went wrong!"});
     }
@@ -22,7 +23,7 @@ router.post("/user/login", async (req, res) =>{
         if(user.error){
             return res.send({error: user.error})
         }
-        req.session.user = await User.sendPublicData(user);
+        req.session.user = User.sendPublicData(user);
         res.send(User.sendPublicData(user));
     }catch(error){
         res.send({error:"Something went wrong!"});
@@ -80,7 +81,7 @@ router.patch("/api/user/:id", apiAuth, async (req, res) =>{
     try{
         const allowedFields = ["name", "address", "password", "image"];
         if(req.files){
-            const imageName = await User.uploadImage(req.files.image);
+            const imageName = await imageUpload(req.files.image);
             if(imageName.error){
                 return res.send({error: imageName.error});
             }
@@ -99,15 +100,15 @@ router.patch("/api/user/:id", apiAuth, async (req, res) =>{
         if(!user){
             res.send({error: "User not updated!"});
         }
-        const oldImageName = user.image;
+        // const oldImageName = user.image;
 
         updatingFields.forEach((field)=>{
             user[field] = req.body[field];
         });
 
-        if(oldImageName !== user.image){
-            const result =  await User.prevImageRemove(oldImageName);
-        }
+        // if(oldImageName !== user.image){
+        //     const result =  await User.prevImageRemove(oldImageName);
+        // }
 
         await user.save();
         req.session.user = await User.sendPublicData(user);
