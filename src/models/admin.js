@@ -28,11 +28,6 @@ const adminSchema = mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-    },
-    image: {
-        type: String,
-        trim: true,
-        default: "noAdminImage.png"
     }
 })
 
@@ -45,38 +40,38 @@ adminSchema.pre("save",async function (next){
     next();
 });
 
-adminSchema.statics.uploadImage = (imageFile) =>{
-    const allowedExt = ["jpg", "jpeg", "png", "JPEG"];
-    let result = "";
-    const imageName = imageFile.name;
-    const imageExt = imageName.split(".").pop();
+// adminSchema.statics.uploadImage = (imageFile) =>{
+//     const allowedExt = ["jpg", "jpeg", "png", "JPEG"];
+//     let result = "";
+//     const imageName = imageFile.name;
+//     const imageExt = imageName.split(".").pop();
     
-    const isValidExt = allowedExt.includes(imageExt);
-    if(!isValidExt){
-        return result = {error: "Invalid Image Format!"}
-    } 
+//     const isValidExt = allowedExt.includes(imageExt);
+//     if(!isValidExt){
+//         return result = {error: "Invalid Image Format!"}
+//     } 
 
-    const newImageName = new ObjectId().toHexString() + "." + imageExt;
-    imageFile.mv(path.resolve(`./public/images/admin/${newImageName}`), (error) => {
-        if(error){
-            return result =  {error: "something went wrong!"}
-        }
-    });
-    return result = newImageName;
-}
+//     const newImageName = new ObjectId().toHexString() + "." + imageExt;
+//     imageFile.mv(path.resolve(`./public/images/admin/${newImageName}`), (error) => {
+//         if(error){
+//             return result =  {error: "something went wrong!"}
+//         }
+//     });
+//     return result = newImageName;
+// }
 
-adminSchema.statics.prevImageRemove = async (imageName) =>{
-    if(imageName === "noAdminImage.png"){
-        return {error: "No image to remove!"}
-    }
+// adminSchema.statics.prevImageRemove = async (imageName) =>{
+//     if(imageName === "noAdminImage.png"){
+//         return {error: "No image to remove!"}
+//     }
 
-    await fs.unlink(`./public/images/admin/${imageName}`, (error) =>{
-        if(error){
-            return {error: "something went wrong!"}
-        }
-    });
-    return {success: "old image removed!"};
-}
+//     await fs.unlink(`./public/images/admin/${imageName}`, (error) =>{
+//         if(error){
+//             return {error: "something went wrong!"}
+//         }
+//     });
+//     return {success: "old image removed!"};
+// }
 
 adminSchema.statics.sendPublicData = (admin) =>{
     return{

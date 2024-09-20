@@ -2,8 +2,7 @@ const express = require("express");
 const Review = require("../models/reviews.js");
 const Product = require("../models/product.js");
 const apiAuth = require("../middleware/apiAuth.js");
-const publicAuth = require("../middleware/publicAuth.js");
-const auth = require("../middleware/auth.js");
+const adminAuth = require("../middleware/auth.js");
 
 const router = new express.Router();
 
@@ -25,7 +24,8 @@ router.post("/api/review", apiAuth, async (req, res) =>{
     }
 });
 
-router.get("/api/review", publicAuth, async (req, res) =>{
+
+router.get("/api/review", async (req, res) =>{
     try{
         const reviews = await Review.find().populate("product", 
             {name: 1, prodId: 1, _id: 1, category: 1}).populate("user", 
@@ -36,22 +36,22 @@ router.get("/api/review", publicAuth, async (req, res) =>{
     }
 });
 
-router.get("/api/review/:id", publicAuth, async (req, res) =>{
-    try{
-        const review = await Review.findById(req.params.id);
-        await review.populate("product", {name: 1, prodId: 1, _id: 1, category: 1});
-        await review.populate("user", {name: 1, email: 1, address: 1});
+// router.get("/api/review/:id", async (req, res) =>{
+//     try{
+//         const review = await Review.findById(req.params.id);
+//         await review.populate("product", {name: 1, prodId: 1, _id: 1, category: 1});
+//         await review.populate("user", {name: 1, email: 1, address: 1});
 
-        if(!review){
-            return res.send({error: "Reviewed item not found!"});
-        }
-        res.send(review);
-    }catch(error){
-        res.send({error: "Something went wrong!"});
-    }
-});
+//         if(!review){
+//             return res.send({error: "Reviewed item not found!"});
+//         }
+//         res.send(review);
+//     }catch(error){
+//         res.send({error: "Something went wrong!"});
+//     }
+// });
 
-router.patch("/api/review/:id", apiAuth, async (req, res) =>{
+router.patch("/api/review/:id", adminAuth, async (req, res) =>{
     try{
         const allowedFields = ["stars", "description"];
         const updatingFields = Object.keys(req.body);
@@ -61,7 +61,7 @@ router.patch("/api/review/:id", apiAuth, async (req, res) =>{
         if(!checkValidity){
             return res.send({error: "Invalid field update"});
         }
-        const review = await Review.findOneAndUpdate({user: req.session.user._id, _id: req.params.id}, req.body, {new: true});
+        const review = await Review.findOneAndUpdate({_id: req.params.id}, req.body, {new: true});
         if(!review){
             return res.send({error: "Reviewed item not found!"});
         }
@@ -75,9 +75,9 @@ router.patch("/api/review/:id", apiAuth, async (req, res) =>{
     }
 });
 
-router.delete("/api/review/:id", apiAuth, async (req, res) =>{
+router.delete("/api/review/:id", adminAuth, async (req, res) =>{
     try{
-        const review = await Review.findOneAndDelete({user: req.session.user._id, _id: req.params.id});
+        const review = await Review.findOneAndDelete({_id: req.params.id});
         if(!review){
             return res.send({error: "Reviewed item not found!"});
         }

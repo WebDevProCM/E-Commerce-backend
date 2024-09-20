@@ -1,18 +1,18 @@
 const express = require("express");
 const Product = require("../models/product.js");
-
+const adminAuth = require("../middleware/auth.js");
 const apiAuth = require("../middleware/apiAuth.js");
-const publicAuth = require("../middleware/publicAuth.js");
 const idGenerator = require("../utilis/idGenerator.js");
+const imageCloud = require("../utilis/cloudinaryUploadImage.js");
 
 const router = new express.Router();
 
 //-------------------api endpoints---------------------------------------
-router.post("/api/product", apiAuth, async (req, res) =>{
+router.post("/api/product", adminAuth, async (req, res) =>{
     req.body.prodId = idGenerator.prodIdGenerator();
     try{
         if(req.files){
-            const imageName = await Product.uploadImage(req.files.image);
+            const imageName = await imageCloud.uploadProductImage(req.files.image);
             if(imageName.error){
                 return res.send({error: imageName.error});
             }
@@ -20,6 +20,11 @@ router.post("/api/product", apiAuth, async (req, res) =>{
             req.body.image = imageName;
         }
         req.body.price = parseFloat(req.body.price).toFixed(2);
+
+        if(req.body.oldPrice !== 0){
+            req.body.oldPrice = parseFloat(req.body.oldPrice).toFixed(2);
+        }
+
         const product = new Product(req.body);
         if(!product){
             return res.send({error: "product not created!"});
@@ -28,11 +33,12 @@ router.post("/api/product", apiAuth, async (req, res) =>{
         await product.save();
         res.send(product);
     }catch(error){
+        console.log(error);
         res.send({error:"something went wrong!"});
     }
 });
 
-router.get("/api/product", publicAuth, async (req, res) =>{
+router.get("/api/product", async (req, res) =>{
     try{
         const products = await Product.find({});
         res.send(products);
@@ -41,7 +47,7 @@ router.get("/api/product", publicAuth, async (req, res) =>{
     }
 });
 
-router.get("/api/product/:id", publicAuth, async (req, res) =>{
+router.get("/api/product/:id", async (req, res) =>{
     try{
         const product = await Product.findOne({prodId: req.params.id});
         if(!product){
@@ -56,11 +62,12 @@ router.get("/api/product/:id", publicAuth, async (req, res) =>{
     }
 });
 
-router.patch("/api/product/:id", apiAuth, async (req, res) =>{
+router.patch("/api/product/:id", adminAuth, async (req, res) =>{
     try{
         const allowedFields = ["name", "quantity", "price", "oldPrice", "status", "image", "category", "type", "description", "ml"];
+
         if(req.files){
-            const imageName = await Product.uploadImage(req.files.image);
+            const imageName = await imageCloud.uploadProductImage(req.files.image);
             if(imageName.error){
                 return res.send({error: imageName.error});
             }
@@ -80,18 +87,22 @@ router.patch("/api/product/:id", apiAuth, async (req, res) =>{
             req.body.price = parseFloat(req.body.price).toFixed(2);
         }
 
+        if(req.body.oldPrice !== 0){
+            req.body.oldPrice = parseFloat(req.body.oldPrice).toFixed(2);
+        }
+
         const product = await Product.findOne({prodId: req.params.id});
         if(!product){
             res.send({error: "product not updated!"});
         }
-        const oldImageName = product.image;
+        // const oldImageName = product.image;
         updatingFields.forEach((field)=>{
             product[field] = req.body[field];
         });
 
-        if(oldImageName !== product.image){
-            const result =  await Product.prevImageRemove(oldImageName);
-        }
+        // if(oldImageName !== product.image){
+        //     const result =  await Product.prevImageRemove(oldImageName);
+        // }
 
         await product.save();
         res.send(product);
@@ -100,7 +111,7 @@ router.patch("/api/product/:id", apiAuth, async (req, res) =>{
     }
 });
 
-router.delete("/api/product/:id", apiAuth, async (req, res) =>{
+router.delete("/api/product/:id", adminAuth, async (req, res) =>{
     try{
         const product = await Product.findOneAndDelete({prodId: req.params.id});
         if(!product){

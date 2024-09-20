@@ -1,8 +1,9 @@
 const express = require("express");
 const User = require("../models/user.js");
-const auth = require("../middleware/auth.js");
+const Adminauth = require("../middleware/auth.js");
 const apiAuth = require("../middleware/apiAuth.js");
-const imageUpload = require("../utilis/cloudinaryUploadImage.js");
+const imageCloud = require("../utilis/cloudinaryUploadImage.js");
+const idGenerator = require("../utilis/idGenerator.js");
 
 const router = new express.Router();
 
@@ -29,7 +30,7 @@ router.post("/user/login", async (req, res) =>{
         res.send({error:"Something went wrong!"});
     }
 });
-router.post("/user/logout", auth, async (req, res) =>{
+router.post("/user/logout", apiAuth, async (req, res) =>{
     try{
         req.session.user = undefined;
         res.send({success: "Looged Out"});
@@ -39,6 +40,7 @@ router.post("/user/logout", auth, async (req, res) =>{
 });
 //-------------------api endpoints---------------------------------------
 router.post("/api/user", async (req, res) =>{
+    req.body.cusId = idGenerator.cusIdGenerator();
     try{
         const user = new User(req.body);
         if(!user){
@@ -55,15 +57,6 @@ router.post("/api/user", async (req, res) =>{
     }
 });
 
-router.get("/api/user", apiAuth, async (req, res) =>{
-    try{
-        const users = await User.find({});
-        res.send(users);
-    }catch(error){
-        res.send({error: "something went wrong!"});
-    }
-});
-
 router.get("/api/user/:id", apiAuth, async (req, res) =>{
     try{
         const user = await User.findById(req.params.id);
@@ -77,11 +70,20 @@ router.get("/api/user/:id", apiAuth, async (req, res) =>{
     }
 });
 
+router.get("/api/users", Adminauth, async (req, res) =>{
+    try{
+        const users = await User.find({});
+        res.send(users);
+    }catch(error){
+        res.send({error: "something went wrong!"});
+    }
+});
+
 router.patch("/api/user/:id", apiAuth, async (req, res) =>{
     try{
         const allowedFields = ["name", "address", "password", "image"];
         if(req.files){
-            const imageName = await imageUpload(req.files.image);
+            const imageName = await imageCloud.uploadImage(req.files.image);
             if(imageName.error){
                 return res.send({error: imageName.error});
             }
@@ -111,7 +113,9 @@ router.patch("/api/user/:id", apiAuth, async (req, res) =>{
         // }
 
         await user.save();
-        req.session.user = await User.sendPublicData(user);
+        if(req.session.user){
+            req.session.user = await User.sendPublicData(user);
+        }
         res.send(User.sendPublicData(user));
     }catch(error){
         console.log(error);
@@ -119,7 +123,7 @@ router.patch("/api/user/:id", apiAuth, async (req, res) =>{
     }
 });
 
-router.delete("/api/user/:id", apiAuth, async (req, res) =>{
+router.delete("/api/user/:id", Adminauth, async (req, res) =>{
     try{
         const user = await User.findByIdAndDelete(req.params.id);
         if(!user){

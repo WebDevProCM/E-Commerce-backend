@@ -26,7 +26,7 @@ app.use(express.static(staticFilesDir));
 
 app.use(session({
   secret: process.env.SECRET,
-  saveUninitialized: true, resave: true, 
+  saveUninitialized: false, resave: false, 
   proxy:true,
   cookie: {
     secure: true,

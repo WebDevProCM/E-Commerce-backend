@@ -7,22 +7,19 @@ const orderSchema = mongoose.Schema({
         trim: true,
         unique: true
     },
-    orderDate: {
-        type: Date,
-        required: true
-    },
     deliveryDate: {
         type: Date,
-        required: true
+        required: true,
+        default: 0
     },
     totalAmount: {
         type: Number,
         default: 0
     },
     status: {
-        type: Number,
+        type: String,
         required: true,
-        default: 0
+        default: "preparing"
     },
     customer: {
         type: mongoose.Schema.Types.ObjectId,
@@ -35,13 +32,13 @@ const orderSchema = mongoose.Schema({
     },
     products: [{
         prodId: String,
+        name: String,
         image: String,
         quantity: Number,
-        name: String,
         price: Number,
         total: Number
     }]
-})
+}, {timestamps: true})
 
 const Order = mongoose.model("Orders", orderSchema);
 

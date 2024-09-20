@@ -6,6 +6,11 @@ const bcrypt = require("bcrypt");
 const ObjectId = mongoose.Types.ObjectId;
 
 const userSchema = mongoose.Schema({
+    cusId: {
+        type: String,
+        required: true,
+        unique: true
+    },
     name: {
         type: String,
         required: true,
@@ -38,7 +43,7 @@ const userSchema = mongoose.Schema({
     image: {
         type: String,
         trim: true,
-        default: "/images/noUserImage.png"
+        default: "noUserImage"
     }
 });
 

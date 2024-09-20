@@ -26,11 +26,25 @@ async function uploadImage(image){
     const encoding = 'base64';
     const base64Data = image.data.toString('base64');
     const fileURL = 'data:' + MIME + ';' + encoding + ',' + base64Data;
-    console.log(fileURL);
     const result = await cloudinary.uploader.upload(fileURL, {
         folder: 'E-commerce-users'
     })
     return result.secure_url;
 }
 
-module.exports = uploadImage
+async function uploadProductImage(image){
+    const fileSize = 1024 * 1024 * 3;
+    if(image.size > fileSize){
+        return {error: "Image size should be less than 3MB"}
+    }
+    const MIME = image.mimetype;
+    const encoding = 'base64';
+    const base64Data = image.data.toString('base64');
+    const fileURL = 'data:' + MIME + ';' + encoding + ',' + base64Data;
+    const result = await cloudinary.uploader.upload(fileURL, {
+        folder: 'E-commerce-Products'
+    })
+    return result.secure_url;
+}
+
+module.exports = {uploadImage, uploadProductImage}
