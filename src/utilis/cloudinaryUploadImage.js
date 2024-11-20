@@ -1,7 +1,6 @@
 const cloudinary = require('cloudinary').v2
 
 if(!process.env.CLOUDINARY_CLOUD_NAME){
-    console.log(process.env.CLOUDINARY_CLOUD_NAME)
     throw new Error("Cloudinary name is not define!")
 }
 if(!process.env.CLOUDINARY_API_KEY){

@@ -1,11 +1,7 @@
 const express = require("express");
-const Order = require("../models/order.js");
-const User = require("../models/user.js");
-const Product = require("../models/product.js");
-
 const adminAuth = require("../middleware/auth.js");
 const apiAuth = require("../middleware/apiAuth.js");
-const idGenerator = require("../utilis/idGenerator.js");
+const ordersController = require("../controllers/orders-controller.js");
 
 const router = new express.Router();
 
@@ -46,116 +42,13 @@ const router = new express.Router();
 //     }
 // });
 
-router.post("/api/order", apiAuth, async (req, res) =>{
-    req.body.ordId = idGenerator.ordIdGenerator();
-    req.body.customer = req.session.user._id;
-    console.log(req.body.customer);
-    req.body.paid = "no";
-
-    const currentDate = new Date();
-    req.body.deliveryDate = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    try{
-        const user = await User.findById(req.body.customer);
-        if(!user){
-            return res.send({error: "User not found!"});
-        }
-
-        // if(product.status > 1){
-        //     return res.send({error: "Product not available at the moment!"});
-        // }
-
-        // if(product.quantity < parseFloat(req.body.quantity)){
-        //     return res.send({error: "Not having enough quantities!"});
-        // }
-
-
-        // const checkExstingProduct = order.products.find(detail => detail.prodId === req.body.prodId);
-        // if(checkExstingProduct){
-        //     checkExstingProduct.quantity = checkExstingProduct.quantity + parseInt(req.body.quantity);
-        //     checkExstingProduct.total = checkExstingProduct.quantity * checkExstingProduct.price;
-        // }else{
-        //     order.products.push({
-        //         quantity: parseFloat(req.body.quantity),
-        //         prodId: product.prodId,
-        //         image: product.image,
-        //         name: product.name,
-        //         price: product.price,
-        //         total: product.price * parseInt(req.body.quantity)
-        //     });
-        // }
-
-        let totalAmount = 0;
-        let errorMsg = '';
-        let products = [];
-
-        for(let i=0; i < req.body.products.length; i++){
-            let ordProduct = await Product.findOne({prodId: req.body.products[i].prodId});
-            if(!ordProduct){
-                errorMsg = {error: "Product not Found!"};
-                break;
-            }
-
-            if(ordProduct.status > 1){
-                errorMsg = {error: "Product not available at the moment!"};
-                break;
-            }
-
-            if(ordProduct.quantity < parseFloat(req.body.products[i].quantity)){
-                errorMsg = {error: "Not having enough quantities!"};
-                break;
-            }
-
-            req.body.products[i].totalAmount = ordProduct.price * req.body.products[i].quantity;
-            req.body.products[i].name = ordProduct.name;
-            req.body.products[i].image = ordProduct.image;
-            req.body.products[i].price = ordProduct.price;
-            totalAmount = totalAmount + req.body.products[i].totalAmount;
-            products.push(req.body.products[i]);
-        }
-        
-        if(errorMsg.error){
-            return res.send({error: errorMsg.error});
-        }
-        req.body.totalAmount = totalAmount;
-        req.body.products = products;
-
-        let order = new Order(req.body);
-        if(!order){
-            return res.send({error: "Order not created!"});
-        }
-
-        await order.save();
-        res.send(order);
-    }catch(error){;
-        console.log(error);
-        res.send({error:"something went wrong!"});
-    }
-});
+router.post("/api/order", apiAuth, ordersController.create);
 
 //==================api endpoints for getting order and order------------
 
-router.get("/api/orders/admin", adminAuth, async (req, res) =>{
-    try{
-        const orders = await Order.find({}).populate("customer", {name:1, _id: 1});
-        res.send(orders);
-    }catch(error){
-        res.send({error: "something went wrong!"});
-    }
-});
+router.get("/api/orders/admin", adminAuth, ordersController.getAdmin);
 
-router.get("/api/order", apiAuth, async (req, res) =>{
-    try{
-        const orders = await Order.find({customer: req.session.user._id});
-        if(!orders){
-            return res.send({error: "Order is not found!"});
-        }
-
-        res.send(orders);
-    }catch(error){
-        res.send({error: "something went wrong!"});
-    }
-});
+router.get("/api/order", apiAuth, ordersController.get);
 
 //==================api endpoints for getting single order and order details------------
 // router.get("/api/order/:id", apiAuth, async (req, res) =>{
@@ -191,34 +84,7 @@ router.get("/api/order", apiAuth, async (req, res) =>{
 // });
 
 //==================api endpoints for updating order and order details------------
-router.patch("/api/order/admin/:id", adminAuth, async (req, res) =>{
-    try{
-        const allowedFields = ["deliveryDate", "status", "paid"];
-        const updatingFields = Object.keys(req.body);
-        const validationCheck = updatingFields.every((field) =>{
-            return allowedFields.includes(field);
-        });
-
-        if(!validationCheck){
-            return res.send({error: "Invalid field update!"});
-        }
-
-        const newDate = new Date(req.body.deliveryDate);
-        req.body.deliveryDate = newDate;
-        
-        let order = await Order.findOneAndUpdate({ordId: req.params.id}, req.body, {new: true});
-        if(!order){
-            return res.send({error: "Order not updated!"});
-        }
-
-        await order.save();
-        await order.populate("customer", {name: 1, _id: 1});
-        res.send(order);
-    }catch(error){
-        console.log(error);
-        res.send({error: "something went wrong!"});
-    }
-});
+router.patch("/api/order/admin/:id", adminAuth, ordersController.update);
 
 // router.patch("/api/order/details/:ordId/:prodId", apiAuth, async (req, res) =>{
 //     try{
@@ -297,27 +163,6 @@ router.patch("/api/order/admin/:id", adminAuth, async (req, res) =>{
 //     }
 // });
 
-router.delete("/api/order/:id", adminAuth, async (req, res) =>{
-    try{
-        let order = await Order.findOneAndDelete({ordId: req.params.ordId});
-        if(!order){
-            return res.send({error: "Order not found!"});
-        }
-
-        for(let i=0; i < order.products.length(); i++){
-            let ordProduct = await Product.findOne({prodId: req.body.products[i].prodId});
-            if(!ordProduct){
-                continue;
-            }
-
-            ordProduct.quantity = ordProduct.quantity + order.products[i].quantity;
-            await ordProduct.save();
-        }
-        
-        res.send(order);
-    }catch(error){
-        res.send({error: "something went wrong!"});
-    }
-});
+router.delete("/api/order/:id", adminAuth, ordersController.remove);
 
 module.exports = router;

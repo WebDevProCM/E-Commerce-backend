@@ -1,9 +1,6 @@
-const fs = require("fs");
-const path = require("path");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
-const ObjectId = mongoose.Types.ObjectId;
 
 const userSchema = mongoose.Schema({
     cusId: {
@@ -47,38 +44,38 @@ const userSchema = mongoose.Schema({
     }
 });
 
-userSchema.statics.uploadImage = (imageFile) =>{
-    const allowedExt = ["jpg", "jpeg", "png", "JPEG"];
-    let result = "";
-    const imageName = imageFile.name;
-    const imageExt = imageName.split(".").pop();
+// userSchema.statics.uploadImage = (imageFile) =>{
+//     const allowedExt = ["jpg", "jpeg", "png", "JPEG"];
+//     let result = "";
+//     const imageName = imageFile.name;
+//     const imageExt = imageName.split(".").pop();
     
-    const isValidExt = allowedExt.includes(imageExt);
-    if(!isValidExt){
-        return result = {error: "Invalid Image Format!"}
-    } 
+//     const isValidExt = allowedExt.includes(imageExt);
+//     if(!isValidExt){
+//         return result = {error: "Invalid Image Format!"}
+//     } 
 
-    const newImageName = new ObjectId().toHexString() + "." + imageExt;
-    imageFile.mv(path.resolve(`./public/images/users/${newImageName}`), (error) => {
-        if(error){
-            return result =  {error: "something went wrong!"}
-        }
-    });
-    return result = newImageName;
-}
+//     const newImageName = new ObjectId().toHexString() + "." + imageExt;
+//     imageFile.mv(path.resolve(`./public/images/users/${newImageName}`), (error) => {
+//         if(error){
+//             return result =  {error: "something went wrong!"}
+//         }
+//     });
+//     return result = newImageName;
+// }
 
-userSchema.statics.prevImageRemove = async (imageName) =>{
-    if(imageName === "noUserImage.png"){
-        return {error: "No image to remove!"}
-    }
+// userSchema.statics.prevImageRemove = async (imageName) =>{
+//     if(imageName === "noUserImage.png"){
+//         return {error: "No image to remove!"}
+//     }
 
-    await fs.unlink(`./public/images/users/${imageName}`, (error) =>{
-        if(error){
-            return {error: "something went wrong!"}
-        }
-    });
-    return {success: "old image removed!"};
-}
+//     await fs.unlink(`./public/images/users/${imageName}`, (error) =>{
+//         if(error){
+//             return {error: "something went wrong!"}
+//         }
+//     });
+//     return {success: "old image removed!"};
+// }
 
 userSchema.statics.sendPublicData = (user) =>{
     return{

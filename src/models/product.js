@@ -1,7 +1,4 @@
-const fs = require("fs");
 const mongoose = require("mongoose");
-const path = require("path");
-const ObjectId = mongoose.Types.ObjectId;
 
 const productsSchema = mongoose.Schema({
     prodId: {
@@ -59,38 +56,38 @@ const productsSchema = mongoose.Schema({
 });
 const Product = mongoose.model("Products", productsSchema);
 
-productsSchema.statics.uploadImage = (imageFile) =>{
-    const allowedExt = ["jpg", "jpeg", "png", "JPEG"];
-    let result = ''
+// productsSchema.statics.uploadImage = (imageFile) =>{
+//     const allowedExt = ["jpg", "jpeg", "png", "JPEG"];
+//     let result = ''
 
-    const imageName = imageFile.name;
-    const imageExt = imageName.split(".").pop();
+//     const imageName = imageFile.name;
+//     const imageExt = imageName.split(".").pop();
     
-    const isValidExt = allowedExt.includes(imageExt);
-    if(!isValidExt){
-        return result = {error: "Invalid Image Format!"}
-    } 
+//     const isValidExt = allowedExt.includes(imageExt);
+//     if(!isValidExt){
+//         return result = {error: "Invalid Image Format!"}
+//     } 
 
-    const newImageName = new ObjectId().toHexString() + "." + imageExt;
-    imageFile.mv(path.resolve(`./public/images/products/${newImageName}`), (error) => {
-        if(error){
-            return result =  {error: "something went wrong!"}
-        }
-    });
-    return result = newImageName;
-}
+//     const newImageName = new ObjectId().toHexString() + "." + imageExt;
+//     imageFile.mv(path.resolve(`./public/images/products/${newImageName}`), (error) => {
+//         if(error){
+//             return result =  {error: "something went wrong!"}
+//         }
+//     });
+//     return result = newImageName;
+// }
 
-productsSchema.statics.prevImageRemove = async (imageName) =>{
-    if(imageName === "noProductImage.png"){
-        return {error: "No image to remove!"}
-    }
+// productsSchema.statics.prevImageRemove = async (imageName) =>{
+//     if(imageName === "noProductImage.png"){
+//         return {error: "No image to remove!"}
+//     }
 
-    await fs.unlink(`./public/images/products/${imageName}`, (error) =>{
-        if(error){
-            return {error: "something went wrong!"}
-        }
-    });
-    return {success: "old image removed!"};
-}
+//     await fs.unlink(`./public/images/products/${imageName}`, (error) =>{
+//         if(error){
+//             return {error: "something went wrong!"}
+//         }
+//     });
+//     return {success: "old image removed!"};
+// }
 
 module.exports = Product;
