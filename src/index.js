@@ -14,6 +14,7 @@ const orderRouter = require("./routers/order-router.js");
 const userRouter = require("./routers/user-router.js");
 const cartRouter = require("./routers/cart-router.js");
 const reviewRouter = require("./routers/review-router.js");
+const paymentRouter = require("./routers/payment-router.js");
 
 app.use(cors({
     origin: process.env.URL,
@@ -46,6 +47,7 @@ app.use(orderRouter);
 app.use(userRouter);
 app.use(cartRouter);
 app.use(reviewRouter);
+app.use(paymentRouter)
 
 app.use((err, req, res, next) =>{
   err.statusCode = err.statusCode || 500

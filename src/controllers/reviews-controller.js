@@ -1,6 +1,7 @@
 const Review = require("../models/reviews.js");
 const Product = require("../models/product.js");
 const catchAsyncError = require("../utilis/catchAsyncError.js");
+const AppError = require("../utilis/errorHandler.js");
 
 const create = catchAsyncError(async (req, res, next) =>{
     req.body.user = req.session.user._id;
@@ -16,10 +17,17 @@ const create = catchAsyncError(async (req, res, next) =>{
     res.send(review);
 })
 
-const get = catchAsyncError(async (req, res, next) =>{
+const getAll = catchAsyncError(async (req, res, next) =>{
     const reviews = await Review.find().populate("product", 
         {name: 1, prodId: 1, _id: 1, category: 1}).populate("user", 
         {name: 1, email: 1, address: 1});
+    res.send(reviews);
+})
+
+const getOne = catchAsyncError(async (req, res, next) =>{
+    const reviews = await Review.find({product: req.params.id}).populate("product", 
+        {name: 1, prodId: 1, _id: 1, category: 1}).populate("user", 
+        {name: 1, email: 1});
     res.send(reviews);
 })
 
@@ -56,7 +64,8 @@ const remove = catchAsyncError(async (req, res, next) =>{
 
 module.exports = {
     create,
-    get,
+    getAll,
+    getOne,
     update,
     remove
 }

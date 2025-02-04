@@ -2,6 +2,7 @@ const imageCloud = require("../utilis/cloudinaryUploadImage.js");
 const idGenerator = require("../utilis/idGenerator.js");
 const User = require("../models/user.js");
 const catchAsyncError = require("../utilis/catchAsyncError.js");
+const AppError = require("../utilis/errorHandler.js");
 
 const loginCheck = catchAsyncError(async (req, res, next) =>{
     if(req.session.user){
@@ -70,6 +71,7 @@ const update = catchAsyncError(async (req, res, next) =>{
         return allowedFields.includes(field);
     });
 
+    console.log(req.params);
     if(!validationCheck){
         return next(new AppError("Invalid field update!", 400));
     }

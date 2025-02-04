@@ -2,6 +2,7 @@ const idGenerator = require("../utilis/idGenerator.js");
 const imageCloud = require("../utilis/cloudinaryUploadImage.js");
 const Product = require("../models/product.js");
 const catchAsyncError = require("../utilis/catchAsyncError.js");
+const AppError = require("../utilis/errorHandler.js");
 
 const create = catchAsyncError(async (req, res, next) =>{
     req.body.prodId = idGenerator.prodIdGenerator();
@@ -29,8 +30,38 @@ const create = catchAsyncError(async (req, res, next) =>{
 })
 
 const getAll = catchAsyncError(async (req, res, next) =>{
-    const products = await Product.find({});
-    res.send(products);
+    const currentPage = req.params.page < 1 ? 1 : req.params.page;
+    const productsPerPage = 9;
+    const skip = (currentPage - 1) * productsPerPage;
+
+    const totalDocuments = await Product.countDocuments({category: {$in: ["Unisex", req.params.category]}});
+    const products = await Product.aggregate([
+        {
+            $match: { category: { $in: ["Unisex", req.params.category] } }
+        },
+        {
+            $lookup:{
+                from:"reviews",
+                localField: "_id",
+                foreignField: "product",
+                as: "reviews"
+            }
+        },
+        {
+            $addFields:{
+                averageRating: {$avg: "$reviews.stars"},
+                totalReviews: {$size: "$reviews"}
+            }
+        },
+        {
+            $project:{
+                reviews: 0
+            }
+        },
+        {$skip: skip},
+        {$limit: productsPerPage}
+    ]);
+    res.send({products: products, total: totalDocuments});
 })
 
 const getOne = catchAsyncError(async (req, res, next) =>{
@@ -41,6 +72,7 @@ const getOne = catchAsyncError(async (req, res, next) =>{
     if(req.session.public){
         req.session.public.products.push(product);
     }
+    console.log(product);
     res.send(product);
 })
 

@@ -7,7 +7,7 @@ const router = new express.Router();
 //-------------------api endpoints---------------------------------------
 router.post("/api/product", adminAuth, productsController.create);
 
-router.get("/api/product", productsController.getAll);
+router.get("/api/products/:category/:page", productsController.getAll);
 
 router.get("/api/product/:id", productsController.getOne);
 
