@@ -30,12 +30,11 @@ const createPayment = catchAsyncError(async (req, res, next) =>{
         }
     })
 
-
     const session = await Stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
         line_items: lineItems,
-        metadata: { userId: req.user._id.toString() },
+        metadata: { userId: req.session.user._id.toString() },
         success_url: `${process.env.URL}/success`,
         cancel_url: `${process.env.URL}/cancel`
     })
