@@ -4,6 +4,8 @@ const express = require("express");
 const expressFile = require("express-fileupload");
 const session = require("express-session");
 const cors = require("cors");
+const bodyParser = require("body-parser");
+const { webhookListener } = require("./controllers/payment-controller.js");
 
 const app = express();
 const PORT = process.env.PORT
@@ -36,6 +38,8 @@ app.use(session({
     maxAge: 1000 * 60 * 60
   }
 }));
+
+app.post("/api/payment/webhook", bodyParser.raw({ type: "application/json" }), webhookListener);
 
 app.use(expressFile());
 app.use(express.json());
