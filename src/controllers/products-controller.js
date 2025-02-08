@@ -72,7 +72,7 @@ const getOne = catchAsyncError(async (req, res, next) =>{
     if(req.session.public){
         req.session.public.products.push(product);
     }
-    console.log(product);
+    // console.log(product);
     res.send(product);
 })
 

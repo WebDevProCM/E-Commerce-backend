@@ -71,7 +71,7 @@ const update = catchAsyncError(async (req, res, next) =>{
         return allowedFields.includes(field);
     });
 
-    console.log(req.params);
+    // console.log(req.params);
     if(!validationCheck){
         return next(new AppError("Invalid field update!", 400));
     }
