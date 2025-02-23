@@ -30,14 +30,15 @@ const create = catchAsyncError(async (req, res, next) =>{
 })
 
 const getAll = catchAsyncError(async (req, res, next) =>{
-    const currentPage = req.params.page < 1 ? 1 : req.params.page;
+    const currentPage = req.query.page < 1 ? 1 : req.query.page;
+    const category = req.query.category
     const productsPerPage = 9;
     const skip = (currentPage - 1) * productsPerPage;
 
-    const totalDocuments = await Product.countDocuments({category: {$in: ["Unisex", req.params.category]}});
+    const totalDocuments = await Product.countDocuments({category: {$in: [...category]}});
     const products = await Product.aggregate([
         {
-            $match: { category: { $in: ["Unisex", req.params.category] } }
+            $match: { category: { $in: [...category] } }
         },
         {
             $lookup:{

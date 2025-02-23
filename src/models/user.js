@@ -80,6 +80,7 @@ const userSchema = mongoose.Schema({
 userSchema.statics.sendPublicData = (user) =>{
     return{
         _id: user._id,
+        cusId: user.cusId,
         name: user.name,
         image: user.image,
         email: user.email,
