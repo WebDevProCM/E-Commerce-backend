@@ -86,10 +86,10 @@ const webhookListener = catchAsyncError(async (req, res, next) => {
             const product = productMap[item.description] || {};
         
             return {
-                totalAmount: item.amount_total,
+                totalAmount: parseFloat((item.amount_total/100).toFixed(2)),
                 name: product.name || item.description, // Fallback in case product is not found
                 image: product.image || "default-product-image",
-                price: item.price.unit_amount,
+                price: parseFloat((item.price.unit_amount/100).toFixed(2)),
                 quantity: item.quantity
             };
         });
